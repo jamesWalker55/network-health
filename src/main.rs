@@ -62,58 +62,68 @@ impl PingCell {
 
     fn subscription_worker() -> impl Stream<Item = PingStatus> {
         stream::channel(100, |mut output| async move {
-            let _ = output.send(PingStatus::Success).await;
-
             loop {
-                println!("Start loop!");
-                let loop_duration = Delay::new(Duration::from_secs(2));
-
-                let ping_task = unblock(|| {
-                    println!("  pinging...");
-                    ping::ping(
-                        std::net::IpAddr::V4(Ipv4Addr::new(8, 8, 8, 8)),
-                        Some(Duration::from_secs(2)),
-                        None,
-                        None,
-                        None,
-                        None,
-                    )
-                });
-
-                let _ = match future::select(ping_task, Delay::new(Duration::from_secs(1))).await {
-                    // ping done before 1 second
-                    future::Either::Left((ping_result, _)) => match ping_result {
-                        Ok(_) => {
-                            println!("  ping Success!");
-                            output.send(PingStatus::Success).await
-                        }
-                        Err(_) => {
-                            println!("  ping Failed!");
-                            output.send(PingStatus::Failed).await
-                        }
-                    },
-                    // 1 second passed, ping not done
-                    future::Either::Right((_, ping_task)) => {
-                        println!("  1 second passed...");
-                        let _ = output.send(PingStatus::Warning).await;
-
-                        match ping_task.await {
-                            Ok(_) => {
-                                println!("  ping Success!");
-                                output.send(PingStatus::Success).await
-                            }
-                            Err(_) => {
-                                println!("  ping Failed!");
-                                output.send(PingStatus::Failed).await
-                            }
-                        }
-                    }
-                };
-
-                // don't overload the pinging
-                loop_duration.await;
+                Delay::new(Duration::from_secs_f64(0.5)).await;
+                output.send(PingStatus::Success).await.unwrap();
+                Delay::new(Duration::from_secs_f64(0.5)).await;
+                output.send(PingStatus::Warning).await.unwrap();
+                Delay::new(Duration::from_secs_f64(0.5)).await;
+                output.send(PingStatus::Failed).await.unwrap();
             }
         })
+        // stream::channel(100, |mut output| async move {
+        //     let _ = output.send(PingStatus::Success).await;
+
+        //     loop {
+        //         println!("Start loop!");
+        //         let loop_duration = Delay::new(Duration::from_secs(2));
+
+        //         let ping_task = unblock(|| {
+        //             println!("  pinging...");
+        //             ping::ping(
+        //                 std::net::IpAddr::V4(Ipv4Addr::new(8, 8, 8, 8)),
+        //                 Some(Duration::from_secs(2)),
+        //                 None,
+        //                 None,
+        //                 None,
+        //                 None,
+        //             )
+        //         });
+
+        //         let _ = match future::select(ping_task, Delay::new(Duration::from_secs(1))).await {
+        //             // ping done before 1 second
+        //             future::Either::Left((ping_result, _)) => match ping_result {
+        //                 Ok(_) => {
+        //                     println!("  ping Success!");
+        //                     output.send(PingStatus::Success).await
+        //                 }
+        //                 Err(_) => {
+        //                     println!("  ping Failed!");
+        //                     output.send(PingStatus::Failed).await
+        //                 }
+        //             },
+        //             // 1 second passed, ping not done
+        //             future::Either::Right((_, ping_task)) => {
+        //                 println!("  1 second passed...");
+        //                 let _ = output.send(PingStatus::Warning).await;
+
+        //                 match ping_task.await {
+        //                     Ok(_) => {
+        //                         println!("  ping Success!");
+        //                         output.send(PingStatus::Success).await
+        //                     }
+        //                     Err(_) => {
+        //                         println!("  ping Failed!");
+        //                         output.send(PingStatus::Failed).await
+        //                     }
+        //                 }
+        //             }
+        //         };
+
+        //         // don't overload the pinging
+        //         loop_duration.await;
+        //     }
+        // })
     }
 }
 
