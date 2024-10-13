@@ -1,13 +1,11 @@
-use blocking::unblock;
 use futures_timer::Delay;
-use iced::futures::future;
 use iced::futures::sink::SinkExt;
 use iced::futures::Stream;
-use iced::stream;
 use iced::widget::{column, text, Column};
 use iced::Center;
 use iced::Subscription;
-use std::{net::Ipv4Addr, time::Duration};
+use iced::{stream, Color, Theme};
+use std::time::Duration;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum PingStatus {
@@ -49,9 +47,21 @@ impl PingCell {
 
     fn view(&self) -> Column<PingStatus> {
         let x = match self.status {
-            PingStatus::Success => text("Success"),
-            PingStatus::Warning => text("Warning"),
-            PingStatus::Failed => text("Failed"),
+            PingStatus::Success => text("O").style(|_: &Theme| {
+                let mut style = text::Style::default();
+                style.color = Some(Color::from_rgb8(240, 240, 240));
+                style
+            }),
+            PingStatus::Warning => text("?").style(|_: &Theme| {
+                let mut style = text::Style::default();
+                style.color = Some(Color::from_rgb8(252, 207, 3));
+                style
+            }),
+            PingStatus::Failed => text("X").style(|_: &Theme| {
+                let mut style = text::Style::default();
+                style.color = Some(Color::from_rgb8(252, 40, 3));
+                style
+            }),
         };
         column![x.size(50)].padding(20).align_x(Center)
     }
