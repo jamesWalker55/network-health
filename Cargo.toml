@@ -4,5 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+blocking = "1.6.1"
+futures-timer = "3.0.3"
 iced = "0.13.1"
 ping = "0.5.2"
