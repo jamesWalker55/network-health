@@ -1,3 +1,5 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use blocking::unblock;
 use futures_timer::Delay;
 use iced::futures::sink::SinkExt;
