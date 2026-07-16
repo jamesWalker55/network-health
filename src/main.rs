@@ -145,6 +145,11 @@ impl PingCell {
 fn main() -> iced::Result {
     // fn main() {
     iced::application("Network Health", PingCell::update, PingCell::view)
+        .level(iced::window::Level::AlwaysOnTop)
+        .window_size(iced::Size {
+            width: 120.0,
+            height: 106.0,
+        })
         .subscription(PingCell::subscription)
         .run()
 }
